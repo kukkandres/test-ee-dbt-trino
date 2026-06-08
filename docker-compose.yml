@@ -1,0 +1,84 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    hostname: mariadb
+    command: --max-connections=300
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: metastore_db
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lakehouse-net
+
+  hive-metastore:
+    image: bitsondatadev/hive-metastore:latest
+    hostname: hive-metastore
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "9083:9083"
+    volumes:
+      - ./docker/hive-metastore/conf/metastore-site.xml:/opt/apache-hive-metastore-3.0.0-bin/conf/metastore-site.xml:ro
+    environment:
+      METASTORE_DB_HOSTNAME: mariadb
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - lakehouse-net
+
+  minio:
+    image: minio/minio:latest
+    hostname: minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server --console-address ":9001" /data
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lakehouse-net
+
+  trino:
+    image: trinodb/trino:435
+    hostname: trino
+    container_name: trino
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/trino/etc/catalog:/etc/trino/catalog
+      - ./sql:/sql:ro
+    depends_on:
+      hive-metastore:
+        condition: service_started
+      minio:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/info"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - lakehouse-net
+
+volumes:
+  minio-data:
+
+networks:
+  lakehouse-net:
+    driver: bridge

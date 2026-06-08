@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: raw_lake
+    description: Parquet files on MinIO registered via the Hive catalog
+    database: hive
+    schema: raw
+    tables:
+      - name: orders
+        description: Raw orders Parquet dataset
+
+  - name: bronze_lake
+    description: Iceberg tables in the bronze layer
+    database: iceberg
+    schema: bronze
+    tables:
+      - name: customers
+        description: Iceberg customers table built from Parquet staging
