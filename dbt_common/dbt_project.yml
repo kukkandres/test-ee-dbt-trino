@@ -1,8 +1,8 @@
-name: ee
+name: ee_common
 version: 1.0.0
 config-version: 2
 
-profile: ee
+profile: ee_common
 
 restrict-access: true
 
@@ -18,12 +18,12 @@ clean-targets:
   - dbt_packages
 
 models:
-  ee:
+  ee_common:
     staging:
       +materialized: view
-      +group: lakehouse
+      +group: common
       +access: private
     marts:
-      +materialized: view
-      +group: lakehouse
+      +materialized: table
+      +group: common
       +access: public

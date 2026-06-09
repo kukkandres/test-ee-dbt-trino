@@ -57,22 +57,22 @@ python scripts/seed_data.py
 echo "Bootstrapping Trino catalogs..."
 docker exec trino trino -f /sql/bootstrap.sql
 
-echo "Running child dbt project (ee)..."
-cd dbt
-export DBT_PROFILES_DIR="${DBT_PROFILES_DIR:-$(pwd)}"
+echo "Running common dbt project (ee_common)..."
+cd dbt_common
+export DBT_PROFILES_DIR="$(pwd)"
 dbt debug
 dbt run
 
-echo "Running child dbt project (ee_analytics)..."
-cd ../dbt_analytics
-export DBT_PROFILES_DIR="${DBT_PROFILES_DIR:-$(pwd)}"
+echo "Running central dbt project (ee_central)..."
+cd ../dbt_central
+export DBT_PROFILES_DIR="$(pwd)"
 dbt deps
 dbt debug
 dbt run
 
-echo "Running parent dbt project (ee_parent)..."
-cd ../dbt_parent
-export DBT_PROFILES_DIR="${DBT_PROFILES_DIR:-$(pwd)}"
+echo "Running sub-unit dbt project (ee_sub_unit_1)..."
+cd ../dbt_sub_unit_1
+export DBT_PROFILES_DIR="$(pwd)"
 dbt deps
 dbt debug
 dbt run

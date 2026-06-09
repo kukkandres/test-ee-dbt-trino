@@ -1,0 +1,6 @@
+packages:
+  - local: ../dbt_common
+    name: ee_common
+  - local: ../dbt_central
+    name: ee_central
+sha1_hash: 35eb3fa7147e908a412597429922da37f7604626

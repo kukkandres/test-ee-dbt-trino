@@ -1,4 +1,4 @@
-ee_parent:
+ee_common:
   target: dev
   outputs:
     dev:
@@ -8,5 +8,5 @@ ee_parent:
       host: "{{ env_var('TRINO_HOST', 'localhost') }}"
       port: "{{ env_var('TRINO_PORT', '8080') | int }}"
       database: iceberg
-      schema: dbt_parent_dev
+      schema: dbt_common_dev
       threads: 4

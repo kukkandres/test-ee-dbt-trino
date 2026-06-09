@@ -1,5 +1,5 @@
 """
-Run the full dbt mesh (lakehouse -> analytics -> parent) in an ephemeral pod.
+Run the full dbt mesh (common -> central -> sub_unit_1) in an ephemeral pod.
 
 Prerequisite: docker-compose lakehouse stack is up and bootstrapped
 (seed_data.py + sql/bootstrap.sql) before triggering this DAG.
@@ -23,20 +23,20 @@ profile_volume = k8s.V1Volume(
 profile_mounts = [
     k8s.V1VolumeMount(
         name="dbt-profiles",
-        mount_path="/etc/dbt/profiles/dbt/profiles.yml",
-        sub_path="ee_profiles.yml",
+        mount_path="/etc/dbt/profiles/dbt_common/profiles.yml",
+        sub_path="ee_common_profiles.yml",
         read_only=True,
     ),
     k8s.V1VolumeMount(
         name="dbt-profiles",
-        mount_path="/etc/dbt/profiles/dbt_analytics/profiles.yml",
-        sub_path="ee_analytics_profiles.yml",
+        mount_path="/etc/dbt/profiles/dbt_central/profiles.yml",
+        sub_path="ee_central_profiles.yml",
         read_only=True,
     ),
     k8s.V1VolumeMount(
         name="dbt-profiles",
-        mount_path="/etc/dbt/profiles/dbt_parent/profiles.yml",
-        sub_path="ee_parent_profiles.yml",
+        mount_path="/etc/dbt/profiles/dbt_sub_unit_1/profiles.yml",
+        sub_path="ee_sub_unit_1_profiles.yml",
         read_only=True,
     ),
 ]

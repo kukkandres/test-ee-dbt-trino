@@ -1,3 +1,0 @@
-packages:
-  - local: ../dbt
-  - local: ../dbt_analytics

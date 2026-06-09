@@ -1,5 +1,5 @@
 groups:
-  - name: lakehouse
+  - name: common
     owner:
       name: data_platform
       email: data-platform@example.com

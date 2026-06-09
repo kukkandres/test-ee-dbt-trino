@@ -1,4 +1,4 @@
-ee_parent:
+ee_central:
   target: dev
   outputs:
     dev:
@@ -8,7 +8,7 @@ ee_parent:
       host: localhost
       port: 8080
       database: iceberg
-      schema: dbt_parent_dev
+      schema: dbt_central_dev
       threads: 4
 
     starburst:
@@ -19,5 +19,5 @@ ee_parent:
       host: starburst.example.com
       port: 443
       database: iceberg
-      schema: dbt_parent_dev
+      schema: dbt_central_dev
       threads: 4

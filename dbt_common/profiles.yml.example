@@ -1,4 +1,4 @@
-ee:
+ee_common:
   target: dev
   outputs:
     dev:
@@ -8,10 +8,9 @@ ee:
       host: localhost
       port: 8080
       database: iceberg
-      schema: dbt_dev
+      schema: dbt_common_dev
       threads: 4
 
-    # Example Starburst / remote cluster target
     starburst:
       type: trino
       method: ldap
@@ -20,5 +19,5 @@ ee:
       host: starburst.example.com
       port: 443
       database: iceberg
-      schema: dbt_dev
+      schema: dbt_common_dev
       threads: 4

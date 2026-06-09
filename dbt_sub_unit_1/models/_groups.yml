@@ -1,0 +1,5 @@
+groups:
+  - name: sub_unit_1
+    owner:
+      name: sub_unit_1_team
+      email: sub-unit-1@example.com

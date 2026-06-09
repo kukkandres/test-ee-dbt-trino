@@ -16,8 +16,8 @@ run_project() {
   dbt run
 }
 
-run_project "dbt" "dbt"
-run_project "dbt_analytics" "dbt_analytics"
-run_project "dbt_parent" "dbt_parent"
+run_project "dbt_common" "dbt_common"
+run_project "dbt_central" "dbt_central"
+run_project "dbt_sub_unit_1" "dbt_sub_unit_1"
 
 echo "dbt mesh run completed successfully."

@@ -11,16 +11,15 @@ RUN pip install --no-cache-dir \
     "dbt-core>=1.8,<2.0" \
     "dbt-trino>=1.8,<2.0"
 
-COPY dbt /workspace/dbt
-COPY dbt_analytics /workspace/dbt_analytics
-COPY dbt_parent /workspace/dbt_parent
+COPY dbt_common /workspace/dbt_common
+COPY dbt_central /workspace/dbt_central
+COPY dbt_sub_unit_1 /workspace/dbt_sub_unit_1
 
 # Resolve packages at image build time (CI has internet for dbt Hub).
-# Local mesh packages resolve via sibling paths; hub packages use package-lock.yml.
-WORKDIR /workspace/dbt_analytics
+WORKDIR /workspace/dbt_central
 RUN dbt deps
 
-WORKDIR /workspace/dbt_parent
+WORKDIR /workspace/dbt_sub_unit_1
 RUN dbt deps
 
 WORKDIR /workspace

@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: rpt_smoke_summary
+    description: Sub-unit view of common gold order summary metrics.
+    access: public
+  - name: rpt_country_metrics
+    description: Sub-unit view of central gold country metrics.
+    access: public

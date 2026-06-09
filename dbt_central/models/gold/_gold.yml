@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: fct_country_metrics
+    description: >
+      Public central gold mart derived from ee_common and medallion layers.
+      Consumed by sub-unit projects.
+    access: public

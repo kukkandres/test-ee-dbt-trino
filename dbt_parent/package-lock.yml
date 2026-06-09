@@ -1,6 +1,0 @@
-packages:
-  - local: ../dbt
-    name: ee
-  - local: ../dbt_analytics
-    name: ee_analytics
-sha1_hash: ec99b407a3dc9eab8c67e468e6cc20424fa2eafd

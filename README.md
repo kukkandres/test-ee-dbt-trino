@@ -9,26 +9,31 @@ Local smoke stack for developing and testing [dbt](https://www.getdbt.com/) mode
 | **MinIO** | S3-compatible object storage (`lakehouse-raw`, `lakehouse-warehouse`) |
 | **Hive Metastore** | Table metadata for Hive + Iceberg catalogs |
 | **Trino** | SQL engine (`hive` catalog for Parquet, `iceberg` catalog for Iceberg) |
-| **dbt-trino** | Transformations; default target schema `iceberg.dbt_dev` |
+| **dbt-trino** | Transformations across mesh projects |
 
-### dbt Mesh (parent + children)
+### dbt Mesh (common → central → sub-units)
 
 | Project | Path | Role | Upstream |
 |---------|------|------|----------|
-| **ee** (child) | `dbt/` | Lakehouse layer — staging + public marts | Sources (Hive/Iceberg) |
-| **ee_analytics** (child) | `dbt_analytics/` | Analytics layer — enriches lakehouse marts | `../dbt` via `packages.yml` |
-| **ee_parent** (parent) | `dbt_parent/` | Reporting layer — final views for consumers | `../dbt` + `../dbt_analytics` via `packages.yml` |
+| **ee_common** | `dbt_common/` | Shared sources from S3, staging, common gold marts | Sources (Hive/Iceberg) |
+| **ee_central** | `dbt_central/` | Centrally managed medallion (bronze/silver/gold tables on S3) | `../dbt_common` via `packages.yml` |
+| **ee_sub_unit_1** | `dbt_sub_unit_1/` | Enterprise sub-unit models (e.g. marketing) | `../dbt_common` + `../dbt_central` |
 
 ```
-dbt (lakehouse) ──► dbt_analytics ──► dbt_parent
-       └──────────────────────────────────┘
+S3 sources ──► dbt_common (ee_common)
+                    │
+                    ▼
+              dbt_central (ee_central) — medallion bronze → silver → gold
+                    │
+                    ▼
+              dbt_sub_unit_1 (ee_sub_unit_1)
 ```
 
-Child marts are marked `access: public`; staging models stay `private`. Each child enforces mesh boundaries with `restrict-access: true`, so downstream projects can only `ref()` public models.
+Public gold marts in common and central are `access: public`. Projects use `restrict-access: true` so downstream can only `ref()` public models. `ee_common` also lists children in `packages.yml` for unified `dbt docs`.
 
 ### Where dbt stores data
 
-Trino/Starburst does not store table files on the engine. With the default **`view`** materialization, dbt creates views in `iceberg.dbt_dev` (metastore only). Source and Iceberg bronze data live on MinIO:
+Trino/Starburst does not store table files on the engine. **Views** materialize as metastore-only objects; **tables** in `ee_common` marts and `ee_central` medallion layers write physical Iceberg data to MinIO. Source and bronze data live on MinIO:
 
 - Parquet: `s3://lakehouse-raw/parquet/...`
 - Iceberg: `s3://lakehouse-warehouse/...`
@@ -68,18 +73,18 @@ python scripts/seed_data.py
 
 docker exec trino trino -f /sql/bootstrap.sql
 
-cd dbt
+cd dbt_common
 export DBT_PROFILES_DIR=$(pwd)
 dbt debug
 dbt run
 
-cd ../dbt_analytics
+cd ../dbt_central
 export DBT_PROFILES_DIR=$(pwd)
 dbt deps
 dbt debug
 dbt run
 
-cd ../dbt_parent
+cd ../dbt_sub_unit_1
 export DBT_PROFILES_DIR=$(pwd)
 dbt deps
 dbt debug
@@ -88,15 +93,16 @@ dbt run
 
 ## dbt docs (full mesh)
 
-Generate documentation from the **parent** project (`dbt_parent`). It installs lakehouse and analytics as packages, so one docs site includes models from all three projects and their cross-package lineage.
+Generate documentation from **ee_common** (`dbt_common`). It installs central and sub-unit projects as packages, so one docs site includes models from all projects and cross-package lineage.
 
 Models must exist in Trino first — run `dbt run` in each project (see [Manual steps](#manual-steps) or `./scripts/smoke.sh`) before generating docs.
 
 ```bash
 source .venv/bin/activate   # from repo root
 
-cd dbt_parent
+cd dbt_common
 export DBT_PROFILES_DIR=$(pwd)
+# For full mesh docs, add central + sub_unit to packages.yml first, then:
 dbt deps
 dbt docs generate
 dbt docs serve --port 8081
@@ -111,7 +117,7 @@ dbt docs generate --static
 open target/static_index.html
 ```
 
-Artifacts are written to `dbt_parent/target/` (`manifest.json`, `catalog.json`, `index.html`).
+Artifacts are written to `dbt_common/target/` (`manifest.json`, `catalog.json`, `index.html`).
 
 ## Services
 
@@ -189,7 +195,7 @@ Or trigger from the Airflow UI.
 After changing `packages.yml` (local mesh or dbt Hub packages), refresh locks locally, commit, and rebuild:
 
 ```bash
-cd dbt_analytics && dbt deps && cd ../dbt_parent && dbt deps && cd ..
+cd dbt_central && dbt deps && cd ../dbt_sub_unit_1 && dbt deps && cd ..
 ./scripts/build-dbt-image.sh
 ```
 
@@ -226,12 +232,12 @@ docker compose down
 
 ## Starburst (production)
 
-Use the same dbt project with `dbt/profiles.yml` pointed at your Starburst host and catalogs. Only connection settings change; storage remains on your object store + catalog (Glue/HMS/Nessie).
+Use the same dbt projects with `dbt_common/profiles.yml` (and central/sub-unit profiles) pointed at your Starburst host and catalogs. Only connection settings change; storage remains on your object store + catalog (Glue/HMS/Nessie).
 
 ## Troubleshooting
 
 - **Trino cannot read S3**: Confirm MinIO is up and credentials in `docker/trino/etc/catalog/*.properties` match `minio` / `minio123`.
 - **Metastore connection errors**: Hive Metastore may need one restart on first boot (`docker compose restart hive-metastore`). Wait until `docker exec trino trino --execute "SHOW CATALOGS"` succeeds before bootstrap.
 - **Bootstrap `No FileSystem for scheme "s3"`**: Use `s3a://` paths in `sql/bootstrap.sql` (already configured).
-- **dbt cannot connect**: Ensure `TRINO_HOST=localhost` and port `8080` are exposed; set `DBT_PROFILES_DIR` to the `dbt/` directory.
+- **dbt cannot connect**: Ensure `TRINO_HOST=localhost` and port `8080` are exposed; set `DBT_PROFILES_DIR` to the relevant project directory (e.g. `dbt_common/`).
 - **Orphan `metastore-ready` container**: Run `docker compose up -d --remove-orphans` after pulling latest compose changes.

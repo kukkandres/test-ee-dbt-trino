@@ -1,4 +1,4 @@
-ee_analytics:
+ee_sub_unit_1:
   target: dev
   outputs:
     dev:
@@ -8,7 +8,7 @@ ee_analytics:
       host: localhost
       port: 8080
       database: iceberg
-      schema: dbt_analytics_dev
+      schema: dbt_sub_unit_1_dev
       threads: 4
 
     starburst:
@@ -19,5 +19,5 @@ ee_analytics:
       host: starburst.example.com
       port: 443
       database: iceberg
-      schema: dbt_analytics_dev
+      schema: dbt_sub_unit_1_dev
       threads: 4

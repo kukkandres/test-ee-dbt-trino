@@ -7,4 +7,4 @@ select
         when total_amount >= 100 then 'high'
         else 'low'
     end as revenue_tier
-from {{ ref('ee', 'fct_smoke_summary') }}
+from {{ ref('ee_common', 'fct_smoke_summary') }}

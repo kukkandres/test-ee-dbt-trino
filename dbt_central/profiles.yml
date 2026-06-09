@@ -1,4 +1,4 @@
-ee_analytics:
+ee_central:
   target: dev
   outputs:
     dev:
@@ -8,5 +8,5 @@ ee_analytics:
       host: "{{ env_var('TRINO_HOST', 'localhost') }}"
       port: "{{ env_var('TRINO_PORT', '8080') | int }}"
       database: iceberg
-      schema: dbt_analytics_dev
+      schema: dbt_central_dev
       threads: 4

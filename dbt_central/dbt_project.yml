@@ -1,8 +1,8 @@
-name: ee_analytics
+name: ee_central
 version: 1.0.0
 config-version: 2
 
-profile: ee_analytics
+profile: ee_central
 
 restrict-access: true
 
@@ -18,8 +18,16 @@ clean-targets:
   - dbt_packages
 
 models:
-  ee_analytics:
-    marts:
-      +materialized: view
-      +group: analytics
+  ee_central:
+    bronze:
+      +materialized: table
+      +group: central
+      +access: private
+    silver:
+      +materialized: table
+      +group: central
+      +access: private
+    gold:
+      +materialized: table
+      +group: central
       +access: public

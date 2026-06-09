@@ -1,0 +1,5 @@
+groups:
+  - name: central
+    owner:
+      name: central_data_team
+      email: central-data@example.com

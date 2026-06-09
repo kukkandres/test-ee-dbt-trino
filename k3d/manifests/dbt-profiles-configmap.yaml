@@ -4,8 +4,8 @@ metadata:
   name: dbt-profiles
   namespace: data-platform
 data:
-  ee_profiles.yml: |
-    ee:
+  ee_common_profiles.yml: |
+    ee_common:
       target: "{{ env_var('DBT_TARGET', 'dev') }}"
       outputs:
         dev:
@@ -15,10 +15,10 @@ data:
           host: "{{ env_var('TRINO_HOST', 'localhost') }}"
           port: "{{ env_var('TRINO_PORT', '8080') | int }}"
           database: iceberg
-          schema: dbt_dev
+          schema: dbt_common_dev
           threads: 4
-  ee_analytics_profiles.yml: |
-    ee_analytics:
+  ee_central_profiles.yml: |
+    ee_central:
       target: "{{ env_var('DBT_TARGET', 'dev') }}"
       outputs:
         dev:
@@ -28,10 +28,10 @@ data:
           host: "{{ env_var('TRINO_HOST', 'localhost') }}"
           port: "{{ env_var('TRINO_PORT', '8080') | int }}"
           database: iceberg
-          schema: dbt_analytics_dev
+          schema: dbt_central_dev
           threads: 4
-  ee_parent_profiles.yml: |
-    ee_parent:
+  ee_sub_unit_1_profiles.yml: |
+    ee_sub_unit_1:
       target: "{{ env_var('DBT_TARGET', 'dev') }}"
       outputs:
         dev:
@@ -41,5 +41,5 @@ data:
           host: "{{ env_var('TRINO_HOST', 'localhost') }}"
           port: "{{ env_var('TRINO_PORT', '8080') | int }}"
           database: iceberg
-          schema: dbt_parent_dev
+          schema: dbt_sub_unit_1_dev
           threads: 4

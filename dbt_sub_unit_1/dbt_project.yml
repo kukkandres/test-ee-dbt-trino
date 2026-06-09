@@ -1,8 +1,10 @@
-name: ee_parent
+name: ee_sub_unit_1
 version: 1.0.0
 config-version: 2
 
-profile: ee_parent
+profile: ee_sub_unit_1
+
+restrict-access: true
 
 model-paths: ["models"]
 analysis-paths: ["analyses"]
@@ -16,6 +18,8 @@ clean-targets:
   - dbt_packages
 
 models:
-  ee_parent:
-    reporting:
+  ee_sub_unit_1:
+    marts:
       +materialized: view
+      +group: sub_unit_1
+      +access: public
