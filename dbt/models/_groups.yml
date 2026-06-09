@@ -1,0 +1,5 @@
+groups:
+  - name: lakehouse
+    owner:
+      name: data_platform
+      email: data-platform@example.com

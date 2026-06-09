@@ -1,0 +1,11 @@
+\version: 2
+
+models:
+  - name: fct_smoke_summary
+    description: >
+      Public mart consumed by downstream mesh projects.
+      Aggregated order and customer metrics by country.
+    access: public
+    config:
+      contract:
+        enforced: false

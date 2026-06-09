@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: fct_country_metrics
+    description: >
+      Public analytics mart derived from lakehouse fct_smoke_summary.
+      Consumed by the parent reporting project.
+    access: public

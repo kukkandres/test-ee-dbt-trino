@@ -1,8 +1,8 @@
-name: eesti_energia
+name: eesti_energia_analytics
 version: 1.0.0
 config-version: 2
 
-profile: eesti_energia
+profile: eesti_energia_analytics
 
 restrict-access: true
 
@@ -18,12 +18,8 @@ clean-targets:
   - dbt_packages
 
 models:
-  eesti_energia:
-    staging:
-      +materialized: view
-      +group: lakehouse
-      +access: private
+  eesti_energia_analytics:
     marts:
       +materialized: view
-      +group: lakehouse
+      +group: analytics
       +access: public

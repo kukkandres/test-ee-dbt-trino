@@ -11,6 +11,21 @@ Local smoke stack for developing and testing [dbt](https://www.getdbt.com/) mode
 | **Trino** | SQL engine (`hive` catalog for Parquet, `iceberg` catalog for Iceberg) |
 | **dbt-trino** | Transformations; default target schema `iceberg.dbt_dev` |
 
+### dbt Mesh (parent + children)
+
+| Project | Path | Role | Upstream |
+|---------|------|------|----------|
+| **eesti_energia** (child) | `dbt/` | Lakehouse layer — staging + public marts | Sources (Hive/Iceberg) |
+| **eesti_energia_analytics** (child) | `dbt_analytics/` | Analytics layer — enriches lakehouse marts | `../dbt` via `packages.yml` |
+| **eesti_energia_parent** (parent) | `dbt_parent/` | Reporting layer — final views for consumers | `../dbt` + `../dbt_analytics` via `packages.yml` |
+
+```
+dbt (lakehouse) ──► dbt_analytics ──► dbt_parent
+       └──────────────────────────────────┘
+```
+
+Child marts are marked `access: public`; staging models stay `private`. Each child enforces mesh boundaries with `restrict-access: true`, so downstream projects can only `ref()` public models.
+
 ### Where dbt stores data
 
 Trino/Starburst does not store table files on the engine. With the default **`view`** materialization, dbt creates views in `iceberg.dbt_dev` (metastore only). Source and Iceberg bronze data live on MinIO:
@@ -56,13 +71,53 @@ cd dbt
 export DBT_PROFILES_DIR=$(pwd)
 dbt debug
 dbt run
+
+cd ../dbt_analytics
+export DBT_PROFILES_DIR=$(pwd)
+dbt deps
+dbt debug
+dbt run
+
+cd ../dbt_parent
+export DBT_PROFILES_DIR=$(pwd)
+dbt deps
+dbt debug
+dbt run
 ```
+
+## dbt docs (full mesh)
+
+Generate documentation from the **parent** project (`dbt_parent`). It installs lakehouse and analytics as packages, so one docs site includes models from all three projects and their cross-package lineage.
+
+Models must exist in Trino first — run `dbt run` in each project (see [Manual steps](#manual-steps) or `./scripts/smoke.sh`) before generating docs.
+
+```bash
+source .venv/bin/activate   # from repo root
+
+cd dbt_parent
+export DBT_PROFILES_DIR=$(pwd)
+dbt deps
+dbt docs generate
+dbt docs serve --port 8081
+```
+
+Open http://localhost:8081. Use port **8081** because Trino already uses **8080**.
+
+To share docs without a local server:
+
+```bash
+dbt docs generate --static
+open target/static_index.html
+```
+
+Artifacts are written to `dbt_parent/target/` (`manifest.json`, `catalog.json`, `index.html`).
 
 ## Services
 
 | Service | URL |
 |---------|-----|
 | Trino UI | http://localhost:8080 |
+| dbt docs | http://localhost:8081 (after `dbt docs serve --port 8081`) |
 | MinIO API | http://localhost:9000 |
 | MinIO Console | http://localhost:9001 (user `minio` / `minio123`) |
 

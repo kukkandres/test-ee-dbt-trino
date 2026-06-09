@@ -1,0 +1,23 @@
+eesti_energia_parent:
+  target: dev
+  outputs:
+    dev:
+      type: trino
+      method: none
+      user: dbt
+      host: localhost
+      port: 8080
+      database: iceberg
+      schema: dbt_parent_dev
+      threads: 4
+
+    starburst:
+      type: trino
+      method: ldap
+      user: your_user
+      password: "{{ env_var('STARburst_PASSWORD') }}"
+      host: starburst.example.com
+      port: 443
+      database: iceberg
+      schema: dbt_parent_dev
+      threads: 4

@@ -7,4 +7,12 @@ dbt/target/
 dbt/logs/
 dbt/dbt_packages/
 
+dbt_parent/target/
+dbt_parent/logs/
+dbt_parent/dbt_packages/
+
+dbt_analytics/target/
+dbt_analytics/logs/
+dbt_analytics/dbt_packages/
+
 .DS_Store
