@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CLUSTER_NAME="${CLUSTER_NAME:-eesti-energia}"
-REGISTRY_NAME="${REGISTRY_NAME:-eesti-energia-registry.localhost}"
+CLUSTER_NAME="${CLUSTER_NAME:-ee}"
+REGISTRY_NAME="${REGISTRY_NAME:-ee-registry.localhost}"
 
 if k3d cluster list | grep -q "^${CLUSTER_NAME} "; then
   echo "Deleting cluster ${CLUSTER_NAME}..."

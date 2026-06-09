@@ -4,8 +4,8 @@ metadata:
   name: dbt-profiles
   namespace: data-platform
 data:
-  eesti_energia_profiles.yml: |
-    eesti_energia:
+  ee_profiles.yml: |
+    ee:
       target: "{{ env_var('DBT_TARGET', 'dev') }}"
       outputs:
         dev:
@@ -17,8 +17,8 @@ data:
           database: iceberg
           schema: dbt_dev
           threads: 4
-  eesti_energia_analytics_profiles.yml: |
-    eesti_energia_analytics:
+  ee_analytics_profiles.yml: |
+    ee_analytics:
       target: "{{ env_var('DBT_TARGET', 'dev') }}"
       outputs:
         dev:
@@ -30,8 +30,8 @@ data:
           database: iceberg
           schema: dbt_analytics_dev
           threads: 4
-  eesti_energia_parent_profiles.yml: |
-    eesti_energia_parent:
+  ee_parent_profiles.yml: |
+    ee_parent:
       target: "{{ env_var('DBT_TARGET', 'dev') }}"
       outputs:
         dev:

@@ -1,8 +1,8 @@
-name: eesti_energia
+name: ee
 version: 1.0.0
 config-version: 2
 
-profile: eesti_energia
+profile: ee
 
 restrict-access: true
 
@@ -18,7 +18,7 @@ clean-targets:
   - dbt_packages
 
 models:
-  eesti_energia:
+  ee:
     staging:
       +materialized: view
       +group: lakehouse

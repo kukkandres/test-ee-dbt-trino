@@ -1,8 +1,8 @@
-name: eesti_energia_analytics
+name: ee_analytics
 version: 1.0.0
 config-version: 2
 
-profile: eesti_energia_analytics
+profile: ee_analytics
 
 restrict-access: true
 
@@ -18,7 +18,7 @@ clean-targets:
   - dbt_packages
 
 models:
-  eesti_energia_analytics:
+  ee_analytics:
     marts:
       +materialized: view
       +group: analytics

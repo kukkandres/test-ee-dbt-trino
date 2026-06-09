@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REGISTRY_HOST="${REGISTRY_HOST:-eesti-energia-registry.localhost:5050}"
-REGISTRY_CLUSTER="${REGISTRY_CLUSTER:-k3d-eesti-energia-registry.localhost:5050}"
+REGISTRY_HOST="${REGISTRY_HOST:-ee-registry.localhost:5050}"
+REGISTRY_CLUSTER="${REGISTRY_CLUSTER:-k3d-ee-registry.localhost:5050}"
 IMAGE_NAME="${IMAGE_NAME:-dbt-mesh-runner:latest}"
 
 cd "${ROOT}"

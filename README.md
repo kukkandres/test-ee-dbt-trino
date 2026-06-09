@@ -15,9 +15,9 @@ Local smoke stack for developing and testing [dbt](https://www.getdbt.com/) mode
 
 | Project | Path | Role | Upstream |
 |---------|------|------|----------|
-| **eesti_energia** (child) | `dbt/` | Lakehouse layer — staging + public marts | Sources (Hive/Iceberg) |
-| **eesti_energia_analytics** (child) | `dbt_analytics/` | Analytics layer — enriches lakehouse marts | `../dbt` via `packages.yml` |
-| **eesti_energia_parent** (parent) | `dbt_parent/` | Reporting layer — final views for consumers | `../dbt` + `../dbt_analytics` via `packages.yml` |
+| **ee** (child) | `dbt/` | Lakehouse layer — staging + public marts | Sources (Hive/Iceberg) |
+| **ee_analytics** (child) | `dbt_analytics/` | Analytics layer — enriches lakehouse marts | `../dbt` via `packages.yml` |
+| **ee_parent** (parent) | `dbt_parent/` | Reporting layer — final views for consumers | `../dbt` + `../dbt_analytics` via `packages.yml` |
 
 ```
 dbt (lakehouse) ──► dbt_analytics ──► dbt_parent
@@ -218,7 +218,7 @@ docker compose down
 
 | Local k3d | Production |
 |-----------|------------|
-| k3d local registry (`k3d-eesti-energia-registry.localhost:5050` in-cluster) | Internal container registry (ECR, GCR, Harbor) |
+| k3d local registry (`k3d-ee-registry.localhost:5050` in-cluster) | Internal container registry (ECR, GCR, Harbor) |
 | `build-dbt-image.sh` (`dbt deps` at build time) | CI pipeline baking `dbt_packages/` into the runner image |
 | `dbt_mesh_run` DAG + `KubernetesPodOperator` | Airflow on K8s spawning ephemeral dbt pods |
 | `dbt-profiles` ConfigMap + `dbt-env` Secret | Platform-managed config injection |

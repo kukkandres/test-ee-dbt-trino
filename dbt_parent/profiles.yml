@@ -1,4 +1,4 @@
-eesti_energia_parent:
+ee_parent:
   target: dev
   outputs:
     dev:

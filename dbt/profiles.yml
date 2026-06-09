@@ -1,4 +1,4 @@
-eesti_energia:
+ee:
   target: dev
   outputs:
     dev:

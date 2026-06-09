@@ -1,4 +1,4 @@
 packages:
   - local: ../dbt
-    name: eesti_energia
+    name: ee
 sha1_hash: 5c9315bb8b4a0b452500c28247305a19835a7ce5

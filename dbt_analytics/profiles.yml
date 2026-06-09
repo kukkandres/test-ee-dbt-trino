@@ -1,4 +1,4 @@
-eesti_energia_analytics:
+ee_analytics:
   target: dev
   outputs:
     dev:

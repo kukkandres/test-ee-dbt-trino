@@ -13,7 +13,7 @@ from airflow.providers.cncf.kubernetes.secret import Secret
 from kubernetes.client import models as k8s
 
 NAMESPACE = "data-platform"
-DBT_IMAGE = "k3d-eesti-energia-registry.localhost:5050/dbt-mesh-runner:latest"
+DBT_IMAGE = "k3d-ee-registry.localhost:5050/dbt-mesh-runner:latest"
 
 profile_volume = k8s.V1Volume(
     name="dbt-profiles",
@@ -24,19 +24,19 @@ profile_mounts = [
     k8s.V1VolumeMount(
         name="dbt-profiles",
         mount_path="/etc/dbt/profiles/dbt/profiles.yml",
-        sub_path="eesti_energia_profiles.yml",
+        sub_path="ee_profiles.yml",
         read_only=True,
     ),
     k8s.V1VolumeMount(
         name="dbt-profiles",
         mount_path="/etc/dbt/profiles/dbt_analytics/profiles.yml",
-        sub_path="eesti_energia_analytics_profiles.yml",
+        sub_path="ee_analytics_profiles.yml",
         read_only=True,
     ),
     k8s.V1VolumeMount(
         name="dbt-profiles",
         mount_path="/etc/dbt/profiles/dbt_parent/profiles.yml",
-        sub_path="eesti_energia_parent_profiles.yml",
+        sub_path="ee_parent_profiles.yml",
         read_only=True,
     ),
 ]

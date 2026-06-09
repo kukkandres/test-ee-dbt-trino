@@ -1,3 +1,5 @@
+name: ee
+
 services:
   mariadb:
     image: mariadb:10.11

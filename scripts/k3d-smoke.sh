@@ -57,7 +57,7 @@ python scripts/seed_data.py
 echo "Bootstrapping Trino catalogs..."
 docker exec trino trino -f /sql/bootstrap.sql
 
-if ! k3d cluster list | grep -q "^eesti-energia "; then
+if ! k3d cluster list | grep -q "^ee "; then
   echo "Creating k3d cluster..."
   "${ROOT}/k3d/cluster-create.sh"
 fi

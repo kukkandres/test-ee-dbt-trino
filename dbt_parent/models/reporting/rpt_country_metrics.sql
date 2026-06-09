@@ -4,4 +4,4 @@ select
     customer_count,
     total_amount,
     revenue_tier
-from {{ ref('eesti_energia_analytics', 'fct_country_metrics') }}
+from {{ ref('ee_analytics', 'fct_country_metrics') }}

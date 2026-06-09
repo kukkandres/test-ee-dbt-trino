@@ -1,8 +1,8 @@
-name: eesti_energia_parent
+name: ee_parent
 version: 1.0.0
 config-version: 2
 
-profile: eesti_energia_parent
+profile: ee_parent
 
 model-paths: ["models"]
 analysis-paths: ["analyses"]
@@ -16,6 +16,6 @@ clean-targets:
   - dbt_packages
 
 models:
-  eesti_energia_parent:
+  ee_parent:
     reporting:
       +materialized: view
