@@ -16,3 +16,5 @@ dbt_analytics/logs/
 dbt_analytics/dbt_packages/
 
 .DS_Store
+
+k3d/manifests/dbt-env-secret.yaml

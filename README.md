@@ -39,6 +39,7 @@ Use `+materialized: table` in `dbt_project.yml` to write physical Iceberg tables
 
 - Docker Desktop (or Docker Engine + Compose)
 - Python 3.11+
+- [k3d](https://k3d.io/) and `kubectl` (for Kubernetes orchestration only)
 
 ## Quick start (smoke test)
 
@@ -127,6 +128,101 @@ Artifacts are written to `dbt_parent/target/` (`manifest.json`, `catalog.json`, 
 |--------|----------------|
 | `raw_lake.orders` | `hive.raw.orders` (Parquet on S3) |
 | `bronze_lake.customers` | `iceberg.bronze.customers` (Iceberg) |
+
+## k3d orchestration (local prod emulation)
+
+Run Airflow on a local k3d cluster and execute dbt in ephemeral pods — similar to production where orchestration runs on Kubernetes, dbt runs in a CI-built image, and connection settings come from ConfigMaps/Secrets. The lakehouse stack (Trino, MinIO, HMS) stays on docker-compose; dbt pods reach Trino via `host.k3d.internal`.
+
+### Architecture
+
+| Component | Where | Purpose |
+|-----------|-------|---------|
+| MinIO, HMS, Trino | docker-compose | Data plane |
+| Airflow scheduler + webserver | k3d | Always-on orchestration |
+| dbt-mesh-runner image | k3d local registry (`:5050`) | Packs all three projects; `dbt deps` baked in at image build |
+| Postgres | k3d | Airflow metadata database |
+| Ephemeral dbt pod | k3d (per DAG run) | Runs full mesh, deleted after finish |
+| `dbt-profiles` ConfigMap | k3d | Injects `profiles.yml` per project |
+| `dbt-env` Secret | k3d | `TRINO_HOST`, `TRINO_PORT`, `DBT_TARGET` |
+
+### One-shot smoke test
+
+```bash
+chmod +x k3d/*.sh scripts/*.sh
+./scripts/k3d-smoke.sh
+```
+
+This will:
+
+1. Start and bootstrap the docker-compose lakehouse (seed + `bootstrap.sql`)
+2. Create the k3d cluster (if missing) with a local registry on port `5050`
+3. Deploy Airflow, ConfigMaps, Secrets, and the dbt runner image
+4. Trigger the `dbt_mesh_run` DAG and wait for success
+
+Airflow UI: http://localhost:8088 (user `admin` / `admin`)
+
+### Manual setup
+
+```bash
+# Lakehouse must be running and bootstrapped first (see Quick start)
+
+./k3d/cluster-create.sh
+./k3d/deploy.sh
+
+# Trigger from CLI
+kubectl exec -n data-platform deployment/airflow-scheduler -- \
+  airflow dags trigger dbt_mesh_run
+```
+
+### Iterative dev loop
+
+After changing dbt models:
+
+```bash
+./scripts/build-dbt-image.sh
+kubectl exec -n data-platform deployment/airflow-scheduler -- \
+  airflow dags trigger dbt_mesh_run
+```
+
+Or trigger from the Airflow UI.
+
+After changing `packages.yml` (local mesh or dbt Hub packages), refresh locks locally, commit, and rebuild:
+
+```bash
+cd dbt_analytics && dbt deps && cd ../dbt_parent && dbt deps && cd ..
+./scripts/build-dbt-image.sh
+```
+
+`dbt_packages/` are resolved during `docker build` (CI has internet). Runtime pods only need Trino connectivity — no dbt Hub access.
+
+### Updating connection settings
+
+Profiles are **not** baked into the dbt image. Edit the ConfigMap or Secret, apply, and re-trigger:
+
+```bash
+kubectl apply -f k3d/manifests/dbt-profiles-configmap.yaml
+# edit k3d/manifests/dbt-env-secret.yaml (copy from .example on first deploy)
+kubectl apply -f k3d/manifests/dbt-env-secret.yaml
+```
+
+For Starburst-like targets, set `TRINO_HOST` to your remote host and add `STARburst_PASSWORD` to the secret; update profile targets in the ConfigMap if needed.
+
+### Teardown
+
+```bash
+./k3d/cluster-delete.sh
+docker compose down
+```
+
+### Production mapping
+
+| Local k3d | Production |
+|-----------|------------|
+| k3d local registry (`k3d-eesti-energia-registry.localhost:5050` in-cluster) | Internal container registry (ECR, GCR, Harbor) |
+| `build-dbt-image.sh` (`dbt deps` at build time) | CI pipeline baking `dbt_packages/` into the runner image |
+| `dbt_mesh_run` DAG + `KubernetesPodOperator` | Airflow on K8s spawning ephemeral dbt pods |
+| `dbt-profiles` ConfigMap + `dbt-env` Secret | Platform-managed config injection |
+| `host.k3d.internal:8080` | Remote Starburst / Trino endpoint |
 
 ## Starburst (production)
 

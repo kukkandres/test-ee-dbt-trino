@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  namespace: data-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow-scheduler
+    spec:
+      serviceAccountName: airflow
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres -p 5432 -U airflow; do
+                echo "Waiting for postgres..."
+                sleep 2
+              done
+        - name: wait-for-db
+          image: apache/airflow:2.9.3-python3.11
+          envFrom:
+            - configMapRef:
+                name: airflow-config
+          command:
+            - bash
+            - -c
+            - |
+              until airflow db check; do
+                echo "Waiting for Airflow database..."
+                sleep 3
+              done
+      containers:
+        - name: scheduler
+          image: apache/airflow:2.9.3-python3.11
+          args: ["scheduler"]
+          envFrom:
+            - configMapRef:
+                name: airflow-config
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 1Gi
+              cpu: "1"
+          volumeMounts:
+            - name: airflow-dags
+              mountPath: /opt/airflow/dags/dbt_mesh_run.py
+              subPath: dbt_mesh_run.py
+      volumes:
+        - name: airflow-dags
+          configMap:
+            name: airflow-dags
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+  namespace: data-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-webserver
+  template:
+    metadata:
+      labels:
+        app: airflow-webserver
+    spec:
+      serviceAccountName: airflow
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres -p 5432 -U airflow; do
+                echo "Waiting for postgres..."
+                sleep 2
+              done
+        - name: wait-for-db
+          image: apache/airflow:2.9.3-python3.11
+          envFrom:
+            - configMapRef:
+                name: airflow-config
+          command:
+            - bash
+            - -c
+            - |
+              until airflow db check; do
+                echo "Waiting for Airflow database..."
+                sleep 3
+              done
+      containers:
+        - name: webserver
+          image: apache/airflow:2.9.3-python3.11
+          args: ["webserver"]
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: airflow-config
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 1Gi
+              cpu: "1"
+          volumeMounts:
+            - name: airflow-dags
+              mountPath: /opt/airflow/dags/dbt_mesh_run.py
+              subPath: dbt_mesh_run.py
+      volumes:
+        - name: airflow-dags
+          configMap:
+            name: airflow-dags

@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbt-profiles
+  namespace: data-platform
+data:
+  eesti_energia_profiles.yml: |
+    eesti_energia:
+      target: "{{ env_var('DBT_TARGET', 'dev') }}"
+      outputs:
+        dev:
+          type: trino
+          method: none
+          user: dbt
+          host: "{{ env_var('TRINO_HOST', 'localhost') }}"
+          port: "{{ env_var('TRINO_PORT', '8080') | int }}"
+          database: iceberg
+          schema: dbt_dev
+          threads: 4
+  eesti_energia_analytics_profiles.yml: |
+    eesti_energia_analytics:
+      target: "{{ env_var('DBT_TARGET', 'dev') }}"
+      outputs:
+        dev:
+          type: trino
+          method: none
+          user: dbt
+          host: "{{ env_var('TRINO_HOST', 'localhost') }}"
+          port: "{{ env_var('TRINO_PORT', '8080') | int }}"
+          database: iceberg
+          schema: dbt_analytics_dev
+          threads: 4
+  eesti_energia_parent_profiles.yml: |
+    eesti_energia_parent:
+      target: "{{ env_var('DBT_TARGET', 'dev') }}"
+      outputs:
+        dev:
+          type: trino
+          method: none
+          user: dbt
+          host: "{{ env_var('TRINO_HOST', 'localhost') }}"
+          port: "{{ env_var('TRINO_PORT', '8080') | int }}"
+          database: iceberg
+          schema: dbt_parent_dev
+          threads: 4
